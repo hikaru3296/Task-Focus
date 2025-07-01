@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Focus App</title>
+    
     <style>
         * {
             margin: 0;
@@ -14,69 +15,73 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             align-items: flex-start;
             padding: 20px;
         }
 
         .app-container {
-            width: 320px;
-            height: 90vh;
+            width: 100%;
+            max-width: 350px;
+            min-height: 90vh;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            position: fixed;
-            right: 20px;
-            top: 20px;
-            z-index: 1000;
         }
 
         .app-header {
-            padding: 16px;
+            padding: 20px;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .app-icon {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             background: linear-gradient(45deg, #ff6b6b, #feca57);
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 16px;
         }
 
         .app-title {
-            font-size: 14px;
+            font-size: 20px;
             font-weight: 600;
             color: #333;
         }
 
         .controls {
-            padding: 12px 16px;
+            padding: 20px;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .add-task-btn {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             background: #4a90e2;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: 500;
             transition: all 0.2s;
         }
 
@@ -88,151 +93,358 @@
         .tasks-container {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 20px;
         }
 
         .task-card {
             background: white;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            cursor: move;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             border: 2px solid transparent;
+            position: relative;
         }
 
         .task-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .task-card.active {
-            border: 2px solid #4a90e2;
-            animation: pulse-border 2s infinite;
+            border: 2px solid transparent;
+            background: white;
+            position: relative;
         }
 
-        @keyframes pulse-border {
-            0%, 100% { border-color: #4a90e2; }
-            50% { border-color: #ff6b6b; }
+        .task-card.active::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            border-radius: 14px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            animation: border-rotate 8s linear infinite;
+            z-index: -1;
         }
 
-        .task-card.completed {
-            opacity: 0.6;
-            background: #f8f9fa;
+        @keyframes border-rotate {
+            0% { 
+                background: linear-gradient(0deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            }
+            25% { 
+                background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            }
+            50% { 
+                background: linear-gradient(180deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            }
+            75% { 
+                background: linear-gradient(270deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            }
+            100% { 
+                background: linear-gradient(360deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff, #5f27cd);
+            }
         }
 
         .task-header {
             display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 8px;
-            gap: 8px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
         }
 
         .task-title {
             flex: 1;
-            font-size: 14px;
+            font-size: 18px;
             font-weight: 500;
             color: #333;
             background: none;
             border: none;
             outline: none;
+            resize: none;
+            min-height: 24px;
+            padding: 8px;
+            border-radius: 6px;
         }
 
         .task-title:focus {
             background: #f8f9fa;
-            border-radius: 4px;
-            padding: 4px;
+            border: 1px solid #ddd;
         }
 
         .task-actions {
             display: flex;
-            gap: 4px;
+            gap: 8px;
+            position: relative;
         }
 
         .task-btn {
-            padding: 4px 8px;
+            padding: 8px 12px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             transition: all 0.2s;
+            white-space: nowrap;
+            min-width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .start-btn { background: #28a745; color: white; }
-        .stop-btn { background: #dc3545; color: white; }
-        .complete-btn { background: #17a2b8; color: white; }
-        .duplicate-btn { background: #ffc107; color: #333; }
-        .delete-btn { background: #6c757d; color: white; }
-        .restore-btn { background: #28a745; color: white; }
+        .menu-btn { 
+            background: #6c757d; 
+            color: white; 
+            font-size: 18px;
+        }
 
         .task-btn:hover {
             transform: scale(1.05);
         }
 
-        .task-timer {
+        .hamburger-menu {
+            position: relative;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            color: #333;
+            white-space: nowrap;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 8px;
         }
 
-        .timer-select {
-            flex: 1;
-            padding: 4px;
+        .menu-item:hover {
+            background: #f8f9fa;
+        }
+
+        .task-timer {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .timer-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-input {
+            width: 60px;
+            padding: 8px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
         }
 
         .time-display {
-            font-size: 12px;
+            font-size: 24px;
             font-weight: bold;
             color: #333;
-            min-width: 50px;
+            min-width: 100px;
+            font-family: 'Courier New', monospace;
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 8px;
             background: #e0e0e0;
-            border-radius: 3px;
+            border-radius: 4px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 16px;
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #28a745, #20c997);
             transition: width 1s ease;
-            border-radius: 3px;
+            border-radius: 4px;
+        }
+
+        .subtasks-section {
+            margin-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 16px;
+        }
+
+        .subtasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .subtasks-title {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .add-subtask-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .subtask-item:hover {
+            background: #f8f9fa;
+        }
+
+        .subtask-checkbox {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .subtask-text {
+            flex: 1;
+            font-size: 14px;
+            border: none;
+            background: none;
+            outline: none;
+            color: #555;
+            padding: 4px;
+        }
+
+        .subtask-text:focus {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .subtask-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .subtask-delete {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .subtask-item:hover .subtask-delete {
+            opacity: 1;
+        }
+
+        .subtask-delete:hover {
+            background: #fee;
         }
 
         .completed-section {
             border-top: 1px solid #e0e0e0;
-            padding: 16px;
-            max-height: 200px;
+            padding: 20px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
         .completed-title {
-            font-size: 12px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            font-weight: 500;
         }
 
         .completed-task {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
-            padding: 4px 0;
+            padding: 8px 12px;
+            margin: 4px 0;
             text-decoration: line-through;
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: space-between;
+            gap: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .completed-task:hover {
+            background: #e9ecef;
+        }
+
+        .completed-task-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .restore-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .completed-task:hover .restore-btn {
+            opacity: 1;
         }
 
         .check-icon {
@@ -240,12 +452,30 @@
             font-weight: bold;
         }
 
-        .dragging {
-            opacity: 0.5;
-            transform: rotate(5deg);
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4a90e2;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
         }
 
-        /* モーダル */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -261,37 +491,71 @@
 
         .modal-content {
             background: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 300px;
+            max-width: 400px;
         }
 
         .modal h3 {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #333;
+            font-size: 20px;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            color: #666;
         }
 
         .modal button {
             margin: 10px 5px;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
         }
 
         .modal .ok-btn {
             background: #4a90e2;
             color: white;
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .task-timer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .time-display {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="notification" id="notification">
+        <div>⏰ 時間です！</div>
+        <div>設定した制限時間に達しました。</div>
+    </div>
+
     <div class="app-container">
         <div class="app-header">
-            <div class="app-icon">T</div>
-            <div class="app-title">Task Focus</div>
+            <div class="header-left">
+                <div class="app-icon">T</div>
+                <div class="app-title">Task Focus</div>
+            </div>
         </div>
         
         <div class="controls">
@@ -313,7 +577,6 @@
         </div>
     </div>
 
-    <!-- 通知モーダル -->
     <div class="modal" id="notificationModal">
         <div class="modal-content">
             <h3>⏰ 時間です！</h3>
@@ -325,320 +588,584 @@
     <script>
         let tasks = [];
         let taskIdCounter = 1;
-        let activeTimer = null;
+        let subtaskIdCounter = 1;
+        let timerWorker = null;
+        let openMenuTaskId = null;
 
-        // タイマー選択肢を生成（5分刻み、最大90分）
-        function generateTimerOptions() {
-            let options = '<option value="0">時間設定なし</option>';
-            for (let i = 5; i <= 90; i += 5) {
-                options += `<option value="${i}">${i}分</option>`;
-            }
-            return options;
+        function createTimerWorker() {
+            const workerCode = `
+                let timerId = null;
+                let activeTaskId = null;
+                
+                self.addEventListener('message', function(e) {
+                    const { action, taskId } = e.data;
+                    
+                    if (action === 'start') {
+                        activeTaskId = taskId;
+                        if (timerId) clearInterval(timerId);
+                        
+                        timerId = setInterval(() => {
+                            self.postMessage({ 
+                                action: 'tick', 
+                                taskId: activeTaskId 
+                            });
+                        }, 1000);
+                    } else if (action === 'stop') {
+                        if (timerId) {
+                            clearInterval(timerId);
+                            timerId = null;
+                        }
+                        activeTaskId = null;
+                    }
+                });
+            `;
+
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            return new Worker(URL.createObjectURL(blob));
         }
 
-        // 新しいタスクを追加
+        function saveData() {
+            const data = {
+                tasks: tasks,
+                taskIdCounter: taskIdCounter,
+                subtaskIdCounter: subtaskIdCounter
+            };
+            try {
+                localStorage.setItem('taskFocusData', JSON.stringify(data));
+            } catch (e) {
+                console.warn('データの保存に失敗しました:', e);
+            }
+        }
+
+        function loadData() {
+            try {
+                const data = localStorage.getItem('taskFocusData');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    tasks = parsed.tasks || [];
+                    taskIdCounter = parsed.taskIdCounter || 1;
+                    subtaskIdCounter = parsed.subtaskIdCounter || 1;
+                    
+                    tasks.forEach(task => {
+                        if (task.isActive) {
+                            task.isActive = false;
+                        }
+                        if (!task.subtasks) {
+                            task.subtasks = [];
+                        }
+                        task.remaining = (task.hours * 60 + task.minutes) * 60;
+                    });
+                }
+            } catch (e) {
+                console.warn('データの読み込みに失敗しました:', e);
+                tasks = [];
+                taskIdCounter = 1;
+                subtaskIdCounter = 1;
+            }
+        }
+
         function addNewTask() {
             const task = {
                 id: taskIdCounter++,
                 title: '新しいタスク',
-                duration: 0,
-                remaining: 0,
+                hours: 0,
+                minutes: 25,
+                remaining: 1500,
                 isActive: false,
                 isCompleted: false,
-                startTime: null
+                startTime: null,
+                subtasks: []
             };
             
             tasks.unshift(task);
+            saveData();
             renderTasks();
         }
 
-        // タスクを開始
+        function addSubtask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const subtask = {
+                    id: subtaskIdCounter++,
+                    text: '',
+                    completed: false
+                };
+                task.subtasks.push(subtask);
+                saveData();
+                renderTasks();
+                
+                setTimeout(() => {
+                    const input = document.querySelector(`[data-subtask-id="${subtask.id}"] .subtask-text`);
+                    if (input) input.focus();
+                }, 100);
+            }
+        }
+
+        function deleteSubtask(taskId, subtaskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.subtasks = task.subtasks.filter(st => st.id !== subtaskId);
+                saveData();
+                renderTasks();
+            }
+        }
+
+        function toggleSubtask(taskId, subtaskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const subtask = task.subtasks.find(st => st.id === subtaskId);
+                if (subtask) {
+                    subtask.completed = !subtask.completed;
+                    saveData();
+                    renderTasks();
+                }
+            }
+        }
+
+        function updateSubtaskText(taskId, subtaskId, text) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const subtask = task.subtasks.find(st => st.id === subtaskId);
+                if (subtask) {
+                    subtask.text = text;
+                    saveData();
+                }
+            }
+        }
+
         function startTask(taskId) {
-            // 他のアクティブなタスクを停止
             tasks.forEach(task => {
                 if (task.isActive) {
                     stopTask(task.id);
                 }
             });
 
-            const task = tasks.find(t => t.id === taskId);
-            if (task && task.duration > 0) {
+            const task = tasks.find(t => t.id === parseInt(taskId));
+            if (task && task.remaining > 0) {
                 task.isActive = true;
-                task.remaining = task.duration * 60; // 秒に変換
                 task.startTime = Date.now();
                 
-                activeTimer = setInterval(() => {
-                    updateTimer(taskId);
-                }, 1000);
+                if (!timerWorker) {
+                    timerWorker = createTimerWorker();
+                    timerWorker.onmessage = function(e) {
+                        if (e.data.action === 'tick') {
+                            updateTimer(e.data.taskId);
+                        }
+                    };
+                }
                 
+                timerWorker.postMessage({ action: 'start', taskId: parseInt(taskId) });
+                closeAllMenus();
+                saveData();
                 renderTasks();
             }
         }
 
-        // タスクを停止
         function stopTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
+            const task = tasks.find(t => t.id === parseInt(taskId));
+            if (task && task.isActive) {
                 task.isActive = false;
-                if (activeTimer) {
-                    clearInterval(activeTimer);
-                    activeTimer = null;
-                }
-                renderTasks();
-            }
-        }
-
-        // タイマー更新
-        function updateTimer(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task && task.isActive) {
-                task.remaining--;
                 
-                if (task.remaining <= 0) {
-                    task.remaining = 0;
-                    stopTask(taskId);
-                    showNotification();
+                if (timerWorker) {
+                    timerWorker.postMessage({ action: 'stop' });
                 }
                 
+                closeAllMenus();
+                saveData();
                 renderTasks();
             }
         }
 
-        // 通知表示
-        function showNotification() {
-            const modal = document.getElementById('notificationModal');
-            modal.style.display = 'flex';
-            
-            // 音を鳴らす（ブラウザ制限により実際の音は制限される場合があります）
-            try {
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmIdBSuFzvLXiTYJGGm98+OWRwQORYvtJ8XcGYWQiIKRczk=');
-                audio.play();
-            } catch (e) {
-                console.log('Audio notification not available');
-            }
-        }
-
-        // 通知を閉じる
-        function closeNotification() {
-            document.getElementById('notificationModal').style.display = 'none';
-        }
-
-        // タスクを複製
-        function duplicateTask(taskId) {
-            const originalTask = tasks.find(t => t.id === taskId);
-            if (originalTask) {
-                const newTask = {
-                    id: taskIdCounter++,
-                    title: originalTask.title + ' (コピー)',
-                    duration: originalTask.duration,
-                    remaining: originalTask.duration * 60,
-                    isActive: false,
-                    isCompleted: false,
-                    startTime: null
-                };
-                
-                // 元のタスクの直後に挿入
-                const originalIndex = tasks.indexOf(originalTask);
-                tasks.splice(originalIndex + 1, 0, newTask);
-                renderTasks();
-            }
-        }
-
-        // 完了タスクを元に戻す
-        function restoreTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.isCompleted = false;
-                task.remaining = task.duration * 60; // タイマーをリセット
-                renderTasks();
-            }
-        }
-        function completeTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                if (task.isActive) {
-                    stopTask(taskId);
-                }
-                task.isCompleted = true;
-                renderTasks();
-            }
-        }
-
-        // タスクを削除
         function deleteTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task && task.isActive) {
-                stopTask(taskId);
-            }
-            tasks = tasks.filter(t => t.id !== taskId);
-            renderTasks();
-        }
-
-        // タスクタイトル更新
-        function updateTaskTitle(taskId, title) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.title = title;
-            }
-        }
-
-        // タスク時間設定更新
-        function updateTaskDuration(taskId, duration) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.duration = parseInt(duration);
-                if (!task.isActive) {
-                    task.remaining = task.duration * 60;
+            if (confirm('このタスクを削除しますか？')) {
+                const taskIndex = tasks.findIndex(t => t.id === parseInt(taskId));
+                
+                if (taskIndex !== -1) {
+                    const task = tasks[taskIndex];
+                    
+                    if (task.isActive && timerWorker) {
+                        timerWorker.postMessage({ action: 'stop' });
+                    }
+                    
+                    tasks.splice(taskIndex, 1);
+                    closeAllMenus();
+                    saveData();
+                    renderTasks();
+                    renderCompletedTasks();
                 }
+            }
+        }
+
+        function restoreTask(taskId) {
+            const task = tasks.find(t => t.id === parseInt(taskId));
+            if (task && task.isCompleted) {
+                task.isCompleted = false;
+                task.remaining = (task.hours * 60 + task.minutes) * 60;
+                task.isActive = false;
+                task.startTime = null;
+                
+                saveData();
                 renderTasks();
+                renderCompletedTasks();
             }
         }
 
-        // 時間を分:秒形式でフォーマット
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        // 進捗計算
-        function calculateProgress(task) {
-            if (task.duration === 0) return 0;
-            const totalSeconds = task.duration * 60;
-            const elapsed = totalSeconds - task.remaining;
-            return (elapsed / totalSeconds) * 100;
-        }
-
-        // タスクをレンダリング
-        function renderTasks() {
-            const container = document.getElementById('tasksContainer');
-            const completedContainer = document.getElementById('completedTasks');
-            
-            const activeTasks = tasks.filter(t => !t.isCompleted);
-            const completedTasks = tasks.filter(t => t.isCompleted);
-            
-            // アクティブタスクを表示
-            container.innerHTML = activeTasks.map(task => `
-                <div class="task-card ${task.isActive ? 'active' : ''}" draggable="true" data-task-id="${task.id}">
-                    <div class="task-header">
-                        <input type="text" 
-                               class="task-title" 
-                               value="${task.title}" 
-                               onchange="updateTaskTitle(${task.id}, this.value)"
-                               onblur="updateTaskTitle(${task.id}, this.value)">
-                        <div class="task-actions">
-                            ${!task.isActive ? 
-                                `<button class="task-btn start-btn" onclick="startTask(${task.id})">開始</button>` : 
-                                `<button class="task-btn stop-btn" onclick="stopTask(${task.id})">停止</button>`
-                            }
-                            <button class="task-btn complete-btn" onclick="completeTask(${task.id})">完了</button>
-                            <button class="task-btn duplicate-btn" onclick="duplicateTask(${task.id})">複製</button>
-                            <button class="task-btn delete-btn" onclick="deleteTask(${task.id})">削除</button>
-                        </div>
-                    </div>
-                    
-                    <div class="task-timer">
-                        <select class="timer-select" 
-                                onchange="updateTaskDuration(${task.id}, this.value)"
-                                ${task.isActive ? 'disabled' : ''}>
-                            ${generateTimerOptions()}
-                        </select>
-                        <div class="time-display">
-                            ${task.duration > 0 ? formatTime(task.remaining) : '--:--'}
-                        </div>
-                    </div>
-                    
-                    ${task.duration > 0 ? `
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${calculateProgress(task)}%"></div>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-
-            // 完了タスクを表示
-            completedContainer.innerHTML = completedTasks.map(task => `
-                <div class="completed-task">
-                    <span class="check-icon">✓</span>
-                    <span style="flex: 1;">${task.title}</span>
-                    <button class="task-btn restore-btn" onclick="restoreTask(${task.id})" style="margin-left: 8px; font-size: 10px; padding: 2px 6px;">元に戻す</button>
-                </div>
-            `).join('');
-
-            // タイマー選択の現在値を設定
-            activeTasks.forEach(task => {
-                const select = container.querySelector(`[data-task-id="${task.id}"] .timer-select`);
-                if (select) {
-                    select.value = task.duration;
+        function updateTimer(taskId) {
+            const task = tasks.find(t => t.id === taskId && t.isActive);
+            if (task) {
+                task.remaining = Math.max(0, task.remaining - 1);
+                
+                // 半分の時間に達した時の通知
+                const totalSeconds = (task.hours * 60 + task.minutes) * 60;
+                const halfTime = Math.floor(totalSeconds / 2);
+                
+                if (task.remaining === halfTime && halfTime > 0) {
+                    showHalfTimeNotification(task.title);
                 }
-            });
-
-            // ドラッグ&ドロップイベントを再設定
-            setupDragAndDrop();
-        }
-
-        // ドラッグ&ドロップ機能
-        function setupDragAndDrop() {
-            const taskCards = document.querySelectorAll('.task-card');
-            
-            taskCards.forEach(card => {
-                card.addEventListener('dragstart', handleDragStart);
-                card.addEventListener('dragover', handleDragOver);
-                card.addEventListener('drop', handleDrop);
-                card.addEventListener('dragend', handleDragEnd);
-            });
-        }
-
-        let draggedElement = null;
-
-        function handleDragStart(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            
-            if (this !== draggedElement) {
-                const draggedTaskId = parseInt(draggedElement.dataset.taskId);
-                const targetTaskId = parseInt(this.dataset.taskId);
                 
-                // アクティブなタスクのみを対象とする
-                const activeTasks = tasks.filter(t => !t.isCompleted);
-                const completedTasks = tasks.filter(t => t.isCompleted);
-                
-                const draggedTaskIndex = activeTasks.findIndex(t => t.id === draggedTaskId);
-                const targetTaskIndex = activeTasks.findIndex(t => t.id === targetTaskId);
-                
-                if (draggedTaskIndex !== -1 && targetTaskIndex !== -1) {
-                    // ドラッグしたタスクを配列から取り出し
-                    const draggedTask = activeTasks.splice(draggedTaskIndex, 1)[0];
+                if (task.remaining === 0) {
+                    task.isActive = false;
+                    showNotification(task.title);
                     
-                    // ターゲット位置に挿入
-                    activeTasks.splice(targetTaskIndex, 0, draggedTask);
-                    
-                    // タスク配列を再構築
-                    tasks = [...activeTasks, ...completedTasks];
+                    if (timerWorker) {
+                        timerWorker.postMessage({ action: 'stop' });
+                    }
+                }
+                
+                saveData();
+                
+                if (openMenuTaskId) {
+                    updateTimerDisplay(taskId);
+                } else {
                     renderTasks();
                 }
             }
         }
 
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            draggedElement = null;
+        function updateTimerDisplay(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+                if (taskCard) {
+                    const timeDisplay = taskCard.querySelector('.time-display');
+                    const progressFill = taskCard.querySelector('.progress-fill');
+                    
+                    if (timeDisplay) {
+                        timeDisplay.textContent = formatTime(task.remaining);
+                    }
+                    
+                    if (progressFill) {
+                        const totalSeconds = (task.hours * 60 + task.minutes) * 60;
+                        const progressPercent = task.remaining > 0 ? 
+                            ((totalSeconds - task.remaining) / totalSeconds) * 100 : 100;
+                        progressFill.style.width = progressPercent + '%';
+                    }
+                    
+                    if (task.isActive) {
+                        taskCard.classList.add('active');
+                    } else {
+                        taskCard.classList.remove('active');
+                    }
+                }
+            }
         }
 
-        // 初期化
-        document.addEventListener('DOMContentLoaded', function() {
-            renderTasks();
+        function completeTask(taskId) {
+            const task = tasks.find(t => t.id === parseInt(taskId));
+            if (task) {
+                if (task.isActive) {
+                    stopTask(taskId);
+                }
+                task.isCompleted = true;
+                
+                closeAllMenus();
+                saveData();
+                renderTasks();
+                renderCompletedTasks();
+            }
+        }
+
+        function duplicateTask(taskId) {
+            const task = tasks.find(t => t.id === parseInt(taskId));
+            if (task) {
+                const duplicatedTask = {
+                    id: taskIdCounter++,
+                    title: task.title + ' (コピー)',
+                    hours: task.hours,
+                    minutes: task.minutes,
+                    remaining: (task.hours * 60 + task.minutes) * 60,
+                    isActive: false,
+                    isCompleted: false,
+                    startTime: null,
+                    subtasks: task.subtasks.map(subtask => ({
+                        id: subtaskIdCounter++,
+                        text: subtask.text,
+                        completed: false
+                    }))
+                };
+                
+                const originalIndex = tasks.findIndex(t => t.id === parseInt(taskId));
+                tasks.splice(originalIndex + 1, 0, duplicatedTask);
+                
+                closeAllMenus();
+                saveData();
+                renderTasks();
+            }
+        }
+
+        function updateTaskTitle(taskId, title) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.title = title;
+                saveData();
+            }
+        }
+
+        function updateTaskTime(taskId, hours, minutes) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task && !task.isActive) {
+                task.hours = Math.max(0, parseInt(hours) || 0);
+                task.minutes = Math.max(0, parseInt(minutes) || 0);
+                task.remaining = (task.hours * 60 + task.minutes) * 60;
+                saveData();
+                renderTasks();
+            }
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                return `${minutes}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function showHalfTimeNotification(taskTitle) {
+            // ブラウザ通知
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Task Focus - 残り半分！', {
+                    body: `${taskTitle} の残り時間が半分になりました！`,
+                    tag: 'task-half-time'
+                });
+            }
+
+            // インアプリ通知
+            const notification = document.getElementById('notification');
+            const originalContent = notification.innerHTML;
+            notification.innerHTML = `
+                <div>⏱️ 残り半分です！</div>
+                <div>${taskTitle} の残り時間が半分になりました。</div>
+            `;
+            notification.style.background = '#ffc107';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.innerHTML = originalContent;
+                    notification.style.background = '#4a90e2';
+                }, 300);
+            }, 4000);
+        }
+
+        function showNotification(taskTitle) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Task Focus', {
+                    body: `${taskTitle} の時間が終了しました！`,
+                    tag: 'task-timer'
+                });
+            }
+
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+
+            const modal = document.getElementById('notificationModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeNotification() {
+            const modal = document.getElementById('notificationModal');
+            modal.style.display = 'none';
+        }
+
+        function toggleMenu(taskId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            const menu = document.querySelector(`[data-task-id="${taskId}"] .menu-dropdown`);
+            const allMenus = document.querySelectorAll('.menu-dropdown');
+            
+            allMenus.forEach(m => {
+                if (m !== menu) m.classList.remove('show');
+            });
+            
+            if (menu) {
+                const isOpening = !menu.classList.contains('show');
+                menu.classList.toggle('show');
+                openMenuTaskId = isOpening ? taskId : null;
+            }
+        }
+
+        function closeAllMenus() {
+            document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                menu.classList.remove('show');
+            });
+            openMenuTaskId = null;
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.hamburger-menu')) {
+                closeAllMenus();
+            }
         });
+
+        function renderTasks() {
+            const container = document.getElementById('tasksContainer');
+            container.innerHTML = '';
+
+            tasks.filter(task => !task.isCompleted).forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card ${task.isActive ? 'active' : ''}`;
+                taskCard.setAttribute('data-task-id', task.id);
+
+                const progressPercent = task.remaining > 0 ? 
+                    ((((task.hours * 60 + task.minutes) * 60) - task.remaining) / ((task.hours * 60 + task.minutes) * 60)) * 100 : 100;
+
+                taskCard.innerHTML = `
+                    <div class="task-header">
+                        <textarea class="task-title" 
+                                  placeholder="タスク名を入力"
+                                  onblur="updateTaskTitle(${task.id}, this.value)"
+                                  onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}">${task.title}</textarea>
+                        <div class="task-actions">
+                            <div class="hamburger-menu">
+                                <button class="task-btn menu-btn" onclick="toggleMenu(${task.id}, event)">⋮</button>
+                                <div class="menu-dropdown">
+                                    ${task.isActive ? 
+                                        `<button class="menu-item" onclick="stopTask(${task.id})">⏸️ 停止</button>` :
+                                        `<button class="menu-item" onclick="startTask(${task.id})">▶️ 開始</button>`
+                                    }
+                                    <button class="menu-item" onclick="completeTask(${task.id})">✅ 完了</button>
+                                    <button class="menu-item" onclick="duplicateTask(${task.id})">📋 複製</button>
+                                    <button class="menu-item" onclick="deleteTask(${task.id})">🗑️ 削除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-timer">
+                        <div class="timer-input-group">
+                            <input type="number" class="timer-input" 
+                                   value="${task.hours}" 
+                                   min="0" max="23"
+                                   onchange="updateTaskTime(${task.id}, this.value, ${task.minutes})"
+                                   ${task.isActive ? 'disabled' : ''}>
+                            <span>時間</span>
+                            <input type="number" class="timer-input" 
+                                   value="${task.minutes}" 
+                                   min="0" max="59"
+                                   onchange="updateTaskTime(${task.id}, ${task.hours}, this.value)"
+                                   ${task.isActive ? 'disabled' : ''}>
+                            <span>分</span>
+                        </div>
+                        <div class="time-display">${formatTime(task.remaining)}</div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    
+                    ${task.subtasks.length > 0 || !task.isActive ? `
+                        <div class="subtasks-section">
+                            <div class="subtasks-header">
+                                <span class="subtasks-title">サブタスク (${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length})</span>
+                                <button class="add-subtask-btn" onclick="addSubtask(${task.id})">+ 追加</button>
+                            </div>
+                            <div class="subtasks-list">
+                                ${task.subtasks.map(subtask => `
+                                    <div class="subtask-item" 
+                                         data-subtask-id="${subtask.id}">
+                                        <input type="checkbox" class="subtask-checkbox" 
+                                               ${subtask.completed ? 'checked' : ''}
+                                               onchange="toggleSubtask(${task.id}, ${subtask.id})">
+                                        <input type="text" class="subtask-text ${subtask.completed ? 'completed' : ''}" 
+                                               value="${subtask.text}"
+                                               placeholder="サブタスクを入力"
+                                               onblur="updateSubtaskText(${task.id}, ${subtask.id}, this.value)"
+                                               onkeydown="if(event.key==='Enter'){this.blur();}">
+                                        <button class="subtask-delete" onclick="deleteSubtask(${task.id}, ${subtask.id})">×</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                container.appendChild(taskCard);
+            });
+        }
+
+        function renderCompletedTasks() {
+            const container = document.getElementById('completedTasks');
+            const completedTasks = tasks.filter(task => task.isCompleted);
+            
+            container.innerHTML = completedTasks.map(task => `
+                <div class="completed-task">
+                    <div class="completed-task-content">
+                        <span class="check-icon">✓</span>
+                        <span>${task.title}</span>
+                    </div>
+                    <button class="restore-btn" onclick="restoreTask(${task.id})" title="タスクを復元">↩️</button>
+                </div>
+            `).join('');
+        }
+
+        function init() {
+            loadData();
+            renderTasks();
+            renderCompletedTasks();
+            
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    saveData();
+                }
+            });
+
+            window.addEventListener('beforeunload', () => {
+                saveData();
+            });
+
+            if (tasks.length === 0) {
+                const sampleTask = {
+                    id: taskIdCounter++,
+                    title: 'サンプルタスク（編集してください）',
+                    hours: 0,
+                    minutes: 25,
+                    remaining: 1500,
+                    isActive: false,
+                    isCompleted: false,
+                    startTime: null,
+                    subtasks: [
+                        { id: subtaskIdCounter++, text: 'サブタスク1', completed: false },
+                        { id: subtaskIdCounter++, text: 'サブタスク2', completed: true },
+                        { id: subtaskIdCounter++, text: 'サブタスク3', completed: false }
+                    ]
+                };
+                tasks.push(sampleTask);
+                saveData();
+                renderTasks();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
